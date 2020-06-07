@@ -1,4 +1,4 @@
-import time, random, os, keyboard
+import time, random, os, json, keyboard
 
 # install keyboard, needs sudo
 
@@ -40,7 +40,6 @@ class Game():
         for i in range(h):
             for j in range(w):
                 gameBoard[i][j] = f"{rbgToAnsii('-', 113, 197, 207) if (i < 8) else rbgToAnsii('=', 221, 216, 148)}"
-        # spawn 4 pipes every
         firstPipePos = 15
         for i in range(15, 100, 15):
             split = random.randint(5, 8)
@@ -52,7 +51,6 @@ class Game():
         for i in range(h):
             res = ""
             for j in range(w):
-                # print('\033[07m', end='')  # reverse colours
                 res += '\033[07m'+gameBoard[i][j]
             print(res)
 
@@ -65,6 +63,15 @@ class Game():
 
             if(firstPipePos == 5):
                 score += 1
+
+            with open('data/user.json') as f:
+                data = json.load(f)
+
+            if(score > data["topScore"]):
+                data["topScore"] += 1
+                with open("data/user.json", 'w') as f:
+                    json.dump(data, f)
+
 
             if(firstPipePos < 0):
                 # this pipe must get removed
@@ -103,9 +110,6 @@ class Bird():
                 if(coor == body or coor == front or coor == beak):
                     gameBoard[i][j] = f"{rbgToAnsii('-', 113, 197, 207) if (i < 8) else rbgToAnsii('=', 221, 216, 148)}"
 
-        # check for collision on this bird
-        # top = gameBoard[y-1][x]
-        # topR = gameBoard[y-1][x+1]
         coor = gameBoard[y][x]
         right = gameBoard[y][x+1]
         twoR = gameBoard[y][x+2]
@@ -116,15 +120,13 @@ class Bird():
             collision = True
 
         mainBody = rbgToAnsii('#', 249, 241, 36)
-        # gameBoard[y-1][x] = mainBody # above
         gameBoard[y][x] = mainBody  # at coordinate
         gameBoard[y][x+1] = mainBody  # right
-        # gameBoard[y-1][x+1] = rbgToAnsii('\\', 249, 241, 36) # above'\\'  # above right
-        gameBoard[y][x+2] = rbgToAnsii('>', 250, 103, 75)  # two right
+        gameBoard[y][x+2] = rbgToAnsii('>', 250, 103, 75)  # two right (beak)
 
 
 
-    def gravity(self):# \x1b[38;2;{r};{g};{b}m{darkToBright[totalBrightness//70]}\x1b[0m
+    def gravity(self):
         '''drop the bird by a row'''
         dropBy = 1
         if(birdYPos+dropBy >= h):
@@ -168,10 +170,14 @@ def main():
 
             frames += 1
             if(frames == 1000):
-                # to rid overflow potential
+                # to rid potential overflow
                 frames = 1
 
-            print(f"Your score is {score}!\n")
+            print(f"Your score is {score}!")
+            with open('data/user.json') as f:
+                data = json.load(f)
+
+            print(f"Your top score is {data['topScore']}.\n")
 
             print("Press \"e\" to end the round")
             print("Press space to jump! ")
