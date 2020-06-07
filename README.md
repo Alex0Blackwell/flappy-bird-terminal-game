@@ -5,7 +5,6 @@
 * [Examples](#examples)
 * [Technologies](#technologies)
 * [Setup](#setup)
-* [Supported Image Types](#supported-image-types)
 * [Limitations](#limitations)
 
 ## Overview
